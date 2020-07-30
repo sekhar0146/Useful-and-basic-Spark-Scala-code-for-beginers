@@ -1,0 +1,39 @@
+package practise
+
+import org.apache.spark.sql.SparkSession
+
+object Spark_intersect {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Spark basic example")
+      .config("spark.master", "local")
+      .getOrCreate()
+
+    spark.sparkContext.setLogLevel("error")
+
+    val acc = spark.read
+      .option("inferSchema", "true")
+      .option("header", "true")
+      .option("charset", "UTF8")
+      .option("delimiter",",")
+      .option("FAILFAST", "true")
+      .csv("C:/Users/z011348/Desktop/Spark/account.csv")
+    acc.show()
+
+    val accnew = spark.read
+      .option("inferSchema", "true")
+      .option("header", "true")
+      .option("charset", "UTF8")
+      .option("delimiter",",")
+      .option("FAILFAST", "true")
+      .csv("C:/Users/z011348/Desktop/Spark/accountlatestfile.csv")
+    accnew.show()
+
+    // intersect returns a new Spark DataFrame containing only rows that are in both DataFrames
+    // This is equivalent to the INTERSECT query in SQL
+
+    val empcommonrows = acc.intersect(accnew).cache()
+    empcommonrows.show()
+  }
+
+}
