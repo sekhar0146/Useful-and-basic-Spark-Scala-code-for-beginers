@@ -10,10 +10,10 @@ object Spark_lookup {
       .config("spark.master", "local")
       .getOrCreate()
 
-    val empdf = spark.read.format("txt").csv("C:/Users/z011348/Desktop/Spark/temp.txt")
+    val empdf = spark.read.format("txt").csv("C:/Users/Desktop/Spark/temp.txt")
       .toDF("eno", "ename","eloc","esal").cache()
 
-    val citydf = spark.read.format("txt").csv("C:/Users/z011348/Desktop/Spark/newcity.txt")
+    val citydf = spark.read.format("txt").csv("C:/Users/Desktop/Spark/newcity.txt")
       .toDF("empno", "newcity").cache()
 
     val b = spark.sparkContext.broadcast(citydf)
