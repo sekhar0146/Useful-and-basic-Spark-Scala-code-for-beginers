@@ -14,7 +14,7 @@ object Spark_UpdateInsert {
     // update and insert : Identify updated and new records
     val accDF = spark.read.format("csv")
       .option("header", "true")
-      .csv("C:/Users/z011348/Desktop/Spark/account.csv")
+      .csv("C:/Users/Desktop/Spark/account.csv")
       .toDF()
       /*
       +----+------+---------+
@@ -29,7 +29,7 @@ object Spark_UpdateInsert {
 
     val acclatestDF = spark.read.format("csv")
       .option("header", "true")
-      .csv("C:/Users/z011348/Desktop/Spark/accountlatestfile.csv")
+      .csv("C:/Users/Desktop/Spark/accountlatestfile.csv")
       .toDF()
       /*
       +-----+-------+----------+
