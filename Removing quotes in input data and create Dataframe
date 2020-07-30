@@ -14,7 +14,7 @@ object spark_DataWithQuotes {
     import spark.implicits._
     val dataRDD = spark
       .sparkContext
-      .textFile("C:/Users/z011348/Desktop/Spark/EmpWithQuotes.csv" )
+      .textFile("C:/Users/Desktop/Spark/EmpWithQuotes.csv" )
 
     dataRDD.collect().foreach(println)
 
