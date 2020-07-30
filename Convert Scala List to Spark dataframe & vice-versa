@@ -1,0 +1,77 @@
+package ClassExamples
+
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+import org.apache.spark.sql.{Row, SparkSession}
+import practise.Spark_CrDF
+
+object Spark_listtoDF {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Spark basic example")
+      .config("spark.master", "local")
+      .getOrCreate()
+
+    spark.sparkContext.setLogLevel("error")
+    import spark.sqlContext.implicits._
+
+    // List to DataFrame
+    val myList = List(("b1", "b2", "b3"), ("a1", "a2", "a3"), ("c1", "c2", "c3"),("a1", "a2", "a3"))
+      .toDF("col1", "col2", "col3")
+
+    myList.show()
+
+    // DataFrame to List
+    val l = myList.select("col1", "col2", "col3").rdd.collect.toList
+    println(l)
+    val l1 = myList.select("col2").rdd.map(r => r(0)).collect.toList
+    println(l1)
+    println(l.toSet)  // converting to SET to eliminate the duplicates
+
+    // again converting List to DataFrame
+    // Generate schema
+    val schema =
+    StructType(
+      Seq(
+        StructField("col1", StringType, nullable = false),
+        StructField("col2", StringType, nullable = false),
+        StructField("col3", StringType, nullable = false)
+      )
+    )
+    val rdd = spark.sparkContext.makeRDD(l)
+    rdd.collect().foreach(println)
+    val newdf = spark.createDataFrame(rdd, schema)
+    newdf.show()
+
+    spark.stop()
+
+  }
+
+}
+
+//*******************************************************
+//* Output
+//*******************************************************
++----+----+----+
+|col1|col2|col3|
++----+----+----+
+|  b1|  b2|  b3|
+|  a1|  a2|  a3|
+|  c1|  c2|  c3|
+|  a1|  a2|  a3|
++----+----+----+
+
+List([b1,b2,b3], [a1,a2,a3], [c1,c2,c3], [a1,a2,a3])
+List(b2, a2, c2, a2)
+Set([b1,b2,b3], [a1,a2,a3], [c1,c2,c3])
+[b1,b2,b3]
+[a1,a2,a3]
+[c1,c2,c3]
+[a1,a2,a3]
++----+----+----+
+|col1|col2|col3|
++----+----+----+
+|  b1|  b2|  b3|
+|  a1|  a2|  a3|
+|  c1|  c2|  c3|
+|  a1|  a2|  a3|
++----+----+----+
