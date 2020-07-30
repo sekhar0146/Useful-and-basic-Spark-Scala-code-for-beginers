@@ -1,0 +1,41 @@
+package practise
+/*import Spark_udf*/
+
+import org.apache.spark.sql.SparkSession
+
+object Spark_udf_call {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Spark basic example")
+      .config("spark.master", "local")
+      .getOrCreate()
+
+    spark.sparkContext.setLogLevel("error")
+
+    val emp = spark.read
+      .option("inferSchema", "true")
+      .option("header", "true")
+      .option("charset", "UTF8")
+      .option("delimiter",",")
+      .option("FAILFAST", "true")
+      .csv("C:/Users/Desktop/Spark/emp.csv")
+      .toDF()
+      .cache()
+
+    import org.apache.spark.sql.functions.udf
+    val Saltype = udf(salaryvalidation)
+    /*val Nullval = udf(nullvalidation)*/
+
+    val e1 = emp.withColumn("sal_type",Saltype(emp("esal")))
+    val e2 = e1.na.fill("NA",Seq("sal_type"))
+    e2.show()
+  }
+
+  def salaryvalidation=(empsal: Int) => {
+    if (empsal <= 2800)
+      "Low"
+    else
+      "High"
+  }
+
+}
