@@ -1,0 +1,74 @@
+package practise
+
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.storage.StorageLevel
+
+object Spark_Functions {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Spark basic example")
+      .config("spark.master", "local")
+      .getOrCreate()
+
+    spark.sparkContext.setLogLevel("error")
+
+    val textdf = spark.read.format("txt")
+      .option("inferSchema", "true")
+      .csv("C:/Users/z011348/Desktop/Spark/temp.txt")
+      .toDF("eno", "ename","eloc","esal")
+
+    textdf.persist()
+    textdf.printSchema()
+    println("Records count : " + textdf.count())
+
+    import spark.implicits._
+    /*val textDS = spark.read
+      .option("inferSchema", "true")    // Mandatory to have the customised schema
+      .option("header", "true")
+      .option("delimiter",",")
+      .textFile("C:/Users/z011348/Desktop/Spark/temp.txt")
+      .as[Employee]
+
+    textDS.show()                             // display the Dataset table*/
+    textdf.show()                          // display the DataFrame table
+
+    textdf.take(3).foreach(println)        // take first 'n' rows
+
+    // selectExpr is a variant of select that selects columns in a DataFrame
+    // while projecting SQL expressions.
+    val selectExDF= textdf.selectExpr("eno", "ename as empname", "esal+1000 as erevised_sal")
+    selectExDF.show()
+
+    // groupBy
+    textdf.groupBy("eloc").count().show()
+    /*textdf.groupBy("eloc").avg("esal").show()
+    textdf.groupBy("eloc").sum("esal").show()*/
+
+    // sortWithinPartitions
+    textdf.sortWithinPartitions("esal").show()
+
+    // sort
+    textdf.sort("ename").show()   // ascending order
+    textdf.sort($"ename".desc).show()     // descending order
+
+    // select specific column
+    textdf.select("ename", "esal").show()
+
+    // drop a column - delete the specified column(s)
+    textdf.drop("esal").show()
+
+    // dropDuplicates - remove the duplicate rows on specified column
+    textdf.dropDuplicates("ename").show()
+
+    // PrintSchema
+    textdf.printSchema()
+
+    textdf.groupBy("eloc").avg("esal").show()
+    textdf.groupBy("eloc").sum("esal").show()
+    textdf.groupBy("eloc").max("esal").show()
+    textdf.describe().show()  // describe the DataFrame statistics
+
+  }
+
+}
+case class Employee (empnum:Int, empname:String, emploc:String, empsal:Long)
