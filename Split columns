@@ -1,0 +1,75 @@
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
+
+object spark_splitcol {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Spark basic example")
+      .config("spark.master", "local")
+      .getOrCreate()
+
+    spark.sparkContext.setLogLevel("error")
+    import spark.implicits._
+
+    val seqTags = Seq(
+      1 -> "so_java",
+      1 -> "so_jsp",
+      2 -> "so_erlang",
+      3 -> "so_scala",
+      3 -> "so_akka"
+    )
+
+    val Tags = seqTags.toDF("id", "tag")
+    Tags.show()
+
+    val splitDF = Tags
+      .withColumn("tempcol", split($"tag", "_"))
+      .select(
+        $"id",
+        $"tag",
+        $"tempcol".getItem(0).as("so_prefix"),
+        $"tempcol".getItem(1).as("so_tag")
+      )
+      .drop("tempcol")
+    splitDF.show()
+
+    splitDF.columns.foreach(println)
+    splitDF.printSchema()
+
+    spark.stop()
+  }
+
+}
+
+//****************************************************
+//* Output
+//****************************************************
++---+---------+
+| id|      tag|
++---+---------+
+|  1|  so_java|
+|  1|   so_jsp|
+|  2|so_erlang|
+|  3| so_scala|
+|  3|  so_akka|
++---+---------+
+
++---+---------+---------+------+
+| id|      tag|so_prefix|so_tag|
++---+---------+---------+------+
+|  1|  so_java|       so|  java|
+|  1|   so_jsp|       so|   jsp|
+|  2|so_erlang|       so|erlang|
+|  3| so_scala|       so| scala|
+|  3|  so_akka|       so|  akka|
++---+---------+---------+------+
+
+id
+tag
+so_prefix
+so_tag
+root
+ |-- id: integer (nullable = false)
+ |-- tag: string (nullable = true)
+ |-- so_prefix: string (nullable = true)
+ |-- so_tag: string (nullable = true)
