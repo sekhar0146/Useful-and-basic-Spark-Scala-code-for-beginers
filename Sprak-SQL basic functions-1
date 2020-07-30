@@ -14,7 +14,7 @@ object Spark_Functions {
 
     val textdf = spark.read.format("txt")
       .option("inferSchema", "true")
-      .csv("C:/Users/z011348/Desktop/Spark/temp.txt")
+      .csv("C:/Users/Desktop/Spark/temp.txt")
       .toDF("eno", "ename","eloc","esal")
 
     textdf.persist()
@@ -26,7 +26,7 @@ object Spark_Functions {
       .option("inferSchema", "true")    // Mandatory to have the customised schema
       .option("header", "true")
       .option("delimiter",",")
-      .textFile("C:/Users/z011348/Desktop/Spark/temp.txt")
+      .textFile("C:/Users/Desktop/Spark/temp.txt")
       .as[Employee]
 
     textDS.show()                             // display the Dataset table*/
