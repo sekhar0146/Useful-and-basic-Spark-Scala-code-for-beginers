@@ -1,0 +1,34 @@
+import org.apache.spark.sql.SparkSession
+
+case class empLayout(eno: Int, ename: String, eloc: String, esal: Int)
+
+object spark_DataWithQuotes {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Spark Analysis example")
+      .config("spark.master", "local")
+      .getOrCreate()
+
+    spark.sparkContext.setLogLevel("error")
+
+    import spark.implicits._
+    val dataRDD = spark
+      .sparkContext
+      .textFile("C:/Users/z011348/Desktop/Spark/EmpWithQuotes.csv" )
+
+    dataRDD.collect().foreach(println)
+
+    // removing header from CSV file
+    val dataWOHeader = dataRDD
+      .mapPartitionsWithIndex{(id_x, iter) => if (id_x == 0) iter.drop(1) else iter }
+
+    val empDF = dataWOHeader.map(line => line.replace("\"",""))
+      .map(line => line.split(","))
+      .map(col => empLayout(col(0).toInt, col(1), col(2), col(3).toInt))
+      .toDF()
+    empDF.show()
+
+    spark.stop()
+  }
+
+}
