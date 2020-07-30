@@ -17,7 +17,7 @@ object Spark_intersect {
       .option("charset", "UTF8")
       .option("delimiter",",")
       .option("FAILFAST", "true")
-      .csv("C:/Users/z011348/Desktop/Spark/account.csv")
+      .csv("C:/Users/Desktop/Spark/account.csv")
     acc.show()
 
     val accnew = spark.read
@@ -26,7 +26,7 @@ object Spark_intersect {
       .option("charset", "UTF8")
       .option("delimiter",",")
       .option("FAILFAST", "true")
-      .csv("C:/Users/z011348/Desktop/Spark/accountlatestfile.csv")
+      .csv("C:/Users/Desktop/Spark/accountlatestfile.csv")
     accnew.show()
 
     // intersect returns a new Spark DataFrame containing only rows that are in both DataFrames
