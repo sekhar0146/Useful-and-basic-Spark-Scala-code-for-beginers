@@ -17,7 +17,7 @@ object Spark_JoinDF {
         .option("charset", "UTF8")
         .option("delimiter",",")
         .option("FAILFAST", "true")
-        .csv("C:/Users/z011348/Desktop/Spark/employee.csv")
+        .csv("C:/Users/Desktop/Spark/employee.csv")
 
       val dpt = spark.read
         .option("inferSchema", "true")
@@ -25,7 +25,7 @@ object Spark_JoinDF {
         .option("charset", "UTF8")
         .option("delimiter",",")
         .option("FAILFAST", "true")
-        .csv("C:/Users/z011348/Desktop/Spark/dept.csv")
+        .csv("C:/Users/Desktop/Spark/dept.csv")
 
     // join in spark which will get me every departments highest salary and avg salary.
     //(1) - highest salary and avg salary dept-wise
