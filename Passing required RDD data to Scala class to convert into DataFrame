@@ -1,0 +1,79 @@
+//* This is the Main class of Spark Scala code to pass the required RDD data to subclass
+
+import org.apache.spark.sql.SparkSession
+
+object Spark_MainEmpClass {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Spark Analysis example")
+      .config("spark.master", "local")
+      .getOrCreate()
+
+    println("SparkContext:")
+    println("APP Name :" + spark.sparkContext.appName)
+    println("Deploy Mode :" + spark.sparkContext.deployMode)
+    println("Master :" + spark.sparkContext.master)
+
+    spark.sparkContext.setLogLevel("error")
+
+    val empRDD = spark
+      .sparkContext
+      .textFile("C:/Users/Desktop/Spark/empInfo.txt")
+
+    //*1 -- Create RDD[String] by concatinating method to send to sub-class
+    val empReqRDD = empRDD
+      .map(a=> a.split(","))
+      .map(x=> (x(0)+","+x(1)+","+x(2)))
+
+    val empdata = new RDDtoDF_subclass()
+    empdata.ConvertRDDtoDF(empReqRDD)
+
+    //*2 -- another way to create RDD[String] is case method
+    val empReqRDD2 = empRDD
+      .map(a=> a.split(","))
+      .map(x=> (x(0), x(1), x(2)))
+
+    val rddString = empReqRDD2.map({case(id,name,city) => "%s,%s,%s".format(id,name,city)})
+    empdata.ConvertRDDtoDF(rddString)
+
+}
+
+}
+
+
+//* scala sub-class receving the data to start the conversion process of DataFrame
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+
+class RDDtoDF_subclass {
+  def ConvertRDDtoDF(RDD1: RDD[String])={
+    val spark = SparkSession.builder()
+      .appName("Spark basic example")
+      .config("spark.master", "local")
+      .getOrCreate()
+
+    spark.sparkContext.setLogLevel("error")
+
+    val schema =
+      StructType(
+        Seq(
+          StructField("empnum", IntegerType, nullable = false),
+          StructField("empname", StringType, nullable = false),
+          StructField("emploc", StringType, nullable = false)
+        )
+      )
+
+    // Convert records of the RDD to Rows
+    val rowRDD = RDD1
+      .map(p => p.split(","))
+      .map(p => Row(p(0).toInt, p(1).toString, p(2).toString))
+/*    rowRDD.collect().foreach(println)*/
+
+    val empDF = spark.createDataFrame(rowRDD, schema)
+    empDF.show()
+    empDF.printSchema()
+
+  }
+
+}
