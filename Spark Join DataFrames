@@ -1,0 +1,43 @@
+package practise
+
+import org.apache.spark.sql.SparkSession
+
+object Spark_JoinDF {
+    def main(args: Array[String]): Unit = {
+      val spark = SparkSession.builder()
+        .appName("Spark basic example")
+        .config("spark.master", "local")
+        .getOrCreate()
+
+      spark.sparkContext.setLogLevel("error")
+
+      val emp = spark.read
+        .option("inferSchema", "true")
+        .option("header", "true")
+        .option("charset", "UTF8")
+        .option("delimiter",",")
+        .option("FAILFAST", "true")
+        .csv("C:/Users/z011348/Desktop/Spark/employee.csv")
+
+      val dpt = spark.read
+        .option("inferSchema", "true")
+        .option("header", "true")
+        .option("charset", "UTF8")
+        .option("delimiter",",")
+        .option("FAILFAST", "true")
+        .csv("C:/Users/z011348/Desktop/Spark/dept.csv")
+
+    // join in spark which will get me every departments highest salary and avg salary.
+    //(1) - highest salary and avg salary dept-wise
+    import org.apache.spark.sql.functions._
+    val salDF = emp
+      .groupBy("edept")
+      .agg(max("esal").as("maxesal"), avg("esal").as("avgsal"))
+
+    //(2) - Join with dept DF to identify department
+    val salDEPTdf = salDF.join(dpt,salDF("edept")===dpt("dno"),"inner")
+        .drop("dno")
+    salDEPTdf.show()
+  }
+
+}
