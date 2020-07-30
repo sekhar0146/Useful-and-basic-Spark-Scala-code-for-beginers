@@ -1,0 +1,40 @@
+package practise
+
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions.broadcast
+
+object Spark_lookup {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Spark basic example")
+      .config("spark.master", "local")
+      .getOrCreate()
+
+    val empdf = spark.read.format("txt").csv("C:/Users/z011348/Desktop/Spark/temp.txt")
+      .toDF("eno", "ename","eloc","esal").cache()
+
+    val citydf = spark.read.format("txt").csv("C:/Users/z011348/Desktop/Spark/newcity.txt")
+      .toDF("empno", "newcity").cache()
+
+    val b = spark.sparkContext.broadcast(citydf)
+
+    // lookup (Search) & broadcast
+    // Join
+    /*  ---- direct broadcast ---- */
+    empdf.join(broadcast(citydf), empdf("eno") === broadcast(citydf)("empno"), "inner")
+      .drop(citydf("empno")).show()
+
+    /* refer broadcast variable in the join */
+    /*empdf.join(b.value, empdf("eno") === b.value("empno"), "inner")
+      .drop(citydf("empno")).show()*/
+    /*spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)  // disable autobradcast join*/
+    empdf.join(b.value, empdf("eno") === b.value("empno"), "inner")
+      .drop(citydf("empno")).explain()
+
+    empdf.unpersist()   // clear the memory
+    citydf.unpersist()  // clear the memory
+
+    spark.stop()  // disconnect sparkSession
+  }
+
+}
