@@ -1,0 +1,29 @@
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+
+object spark_CreateEmptyDF {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Spark basic example")
+      .config("spark.master", "local")
+      .getOrCreate()
+
+    spark.sparkContext.setLogLevel("error")
+
+    val schema =
+      StructType(
+        Seq(
+          StructField("empnum", IntegerType, nullable = false),
+          StructField("empname", StringType, nullable = false),
+          StructField("emploc", StringType, nullable = false)
+        )
+      )
+
+    // Create empty dataframe using StructType schema
+    val empdf = spark
+      .createDataFrame(spark.sparkContext.emptyRDD[Row], schema)
+
+    empdf.show()
+
+  }
+}
