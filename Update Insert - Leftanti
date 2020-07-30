@@ -1,0 +1,72 @@
+package practise
+
+import org.apache.spark.sql.SparkSession
+
+object Spark_UpdateInsert {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Spark basic example")
+      .config("spark.master", "local")
+      .getOrCreate()
+
+    spark.sparkContext.setLogLevel("error")
+
+    // update and insert : Identify updated and new records
+    val accDF = spark.read.format("csv")
+      .option("header", "true")
+      .csv("C:/Users/z011348/Desktop/Spark/account.csv")
+      .toDF()
+      /*
+      +----+------+---------+
+      |acno|acname|acbalance|
+      +----+------+---------+
+      |1000|   ram|    30000|
+      |2000|   raj|    50000|
+      |4000|   nag|    34500|
+      |5000| vijay|    56000|
+      +----+------+---------+
+      */
+
+    val acclatestDF = spark.read.format("csv")
+      .option("header", "true")
+      .csv("C:/Users/z011348/Desktop/Spark/accountlatestfile.csv")
+      .toDF()
+      /*
+      +-----+-------+----------+
+      |accno|accname|accbalance|
+      +-----+-------+----------+
+      | 1000|    ram|     30000|
+      | 2000|    raj|     60000|
+      | 5000|  vijay|     56000|
+      | 7000|    abc|     22000|
+      | 8000|    xyz|     17000|
+      +-----+-------+----------+
+      */
+    // Rows from accDF not in acclatestDF
+    val existedrecords = accDF.join(acclatestDF, accDF("acno") === acclatestDF("accno"), "leftanti")
+    existedrecords.show()
+    /*
+    +----+------+---------+
+    |acno|acname|acbalance|
+    +----+------+---------+
+    |4000|   nag|    34500|
+    +----+------+---------+
+    */
+
+    val remainRecords = acclatestDF.union(existedrecords)
+    remainRecords.show()
+    /*
+      +-----+-------+----------+
+      |accno|accname|accbalance|
+      +-----+-------+----------+
+      | 1000|    ram|     30000|
+      | 2000|    raj|     60000|
+      | 5000|  vijay|     56000|
+      | 7000|    abc|     22000|
+      | 8000|    xyz|     17000|
+      | 4000|    nag|     34500|
+      +-----+-------+----------+
+      */
+    spark.stop()
+  }
+}
