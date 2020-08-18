@@ -1,0 +1,28 @@
+package ClassExamples
+
+import org.apache.spark.sql.SparkSession
+
+object Spark_RDD_reduceByKey {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Spark basic example")
+      .config("spark.master", "local")
+      .getOrCreate()
+    spark.sparkContext.setLogLevel("error")
+    // creation of rdd
+    val rd1 = spark.sparkContext.parallelize(Array((1,2),(3,2),(1,4),(3,5),(4,6)))
+    // reduceByKey = Combine all values on keys together
+    val redBykey = rd1.reduceByKey((a,b) => a+b)
+    redBykey.collect().foreach(println)
+    /*(4,6)
+      (1,6)
+      (3,7)*/
+  }
+
+}
+
+Output:
+=======
+(4,6)
+(1,6)
+(3,7)
