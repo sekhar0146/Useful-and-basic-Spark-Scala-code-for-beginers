@@ -1,0 +1,38 @@
+import org.apache.spark.sql.SparkSession
+
+object Spark_OlympicMainClass {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Spark basic example")
+      .config("spark.master", "local")
+      .getOrCreate()
+
+    val inputjson = spark.read.json("C:/Users/Desktop/Spark/casestudy/olympic.json").cache()
+    inputjson.show()
+
+    // Find the total number of medals won by each country in swimming on medals-wise
+    val medalsWise = inputjson.filter(inputjson("sport")==="Swimming")
+      .groupBy("country","sport")
+      .sum("bronze", "gold", "silver")
+      .withColumnRenamed("sum(bronze)", "bronze")
+      .withColumnRenamed("sum(gold)", "gold")
+      .withColumnRenamed("sum(silver)", "silver").cache()
+
+    medalsWise.show()
+
+    // Find the total number of medals won by each country in swimming
+    medalsWise.withColumn("total_medals",
+      medalsWise("bronze") + medalsWise("gold") + medalsWise("silver")).show()
+
+    // Find the number of medals that US won year wise
+    inputjson.filter(inputjson("country")==="United States")
+      .groupBy("year").sum("total").show()
+
+    // Find the number of medals won year wise
+    inputjson.groupBy("country").sum("total").show()
+
+    spark.stop()
+
+  }
+
+}
