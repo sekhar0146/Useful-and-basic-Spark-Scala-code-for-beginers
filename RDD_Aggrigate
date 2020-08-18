@@ -1,0 +1,28 @@
+import org.apache.spark.sql.SparkSession
+
+object Spark_RDD_Aggrigate {
+  def main(args: Array[String]): Unit = {
+    val spark = SparkSession.builder()
+      .appName("Spark basic example")
+      .config("spark.master", "local")
+      .getOrCreate()
+    spark.sparkContext.setLogLevel("error")
+    val rd1 = spark.sparkContext.parallelize(1 to 50)
+
+    // Req: (sum, count) : Input is not tuple
+    val SumCount = rd1.aggregate((0,0))((a,b)=> (a._1+b, a._2+1),(a,b)=> (a._1+b._1, a._2+b._2))
+    println(SumCount)
+
+    // Req: keys and values added together : Input is tuple
+    val rd2 = spark.sparkContext.parallelize(Array((1,2),(3,2),(1,4),(3,5),(4,6)))
+    val addKeyVal = rd2.aggregate((0,0))((a,b)=> (a._1+b._1, a._2+b._2),(a,b)=> (a._1+b._1, a._2+b._2))
+    println(addKeyVal)
+  }
+
+}
+
+
+Output:
+=======
+(1275,50)
+(12,19)
